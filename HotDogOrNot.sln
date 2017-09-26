@@ -1,0 +1,23 @@
+
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HotDogOrNot", "HotDogOrNot\HotDogOrNot.csproj", "{4E1CA6E7-88BF-45CA-B3E3-DB2C5EF3C505}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|iPhoneSimulator = Debug|iPhoneSimulator
+		Release|iPhone = Release|iPhone
+		Release|iPhoneSimulator = Release|iPhoneSimulator
+		Debug|iPhone = Debug|iPhone
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{4E1CA6E7-88BF-45CA-B3E3-DB2C5EF3C505}.Debug|iPhoneSimulator.ActiveCfg = Debug|iPhoneSimulator
+		{4E1CA6E7-88BF-45CA-B3E3-DB2C5EF3C505}.Debug|iPhoneSimulator.Build.0 = Debug|iPhoneSimulator
+		{4E1CA6E7-88BF-45CA-B3E3-DB2C5EF3C505}.Release|iPhone.ActiveCfg = Release|iPhone
+		{4E1CA6E7-88BF-45CA-B3E3-DB2C5EF3C505}.Release|iPhone.Build.0 = Release|iPhone
+		{4E1CA6E7-88BF-45CA-B3E3-DB2C5EF3C505}.Release|iPhoneSimulator.ActiveCfg = Release|iPhoneSimulator
+		{4E1CA6E7-88BF-45CA-B3E3-DB2C5EF3C505}.Release|iPhoneSimulator.Build.0 = Release|iPhoneSimulator
+		{4E1CA6E7-88BF-45CA-B3E3-DB2C5EF3C505}.Debug|iPhone.ActiveCfg = Debug|iPhone
+		{4E1CA6E7-88BF-45CA-B3E3-DB2C5EF3C505}.Debug|iPhone.Build.0 = Debug|iPhone
+	EndGlobalSection
+EndGlobal
