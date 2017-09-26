@@ -37,7 +37,7 @@ namespace HotDogOrNot
 				if (error == null) {
 					var nvModel = VNCoreMLModel.FromMLModel (model, out error);
 					if (error == null) {
-						classificationRequest = new VNCoreMLRequest (nvModel, HandleVNRequestCompletionHandler);
+						classificationRequest = new VNCoreMLRequest (nvModel, HandleVNRequest);
 					}
 				}
 			}
@@ -91,7 +91,7 @@ namespace HotDogOrNot
 			Console.WriteLine (image);
 		}
 
-		void HandleVNRequestCompletionHandler (VNRequest request, NSError error)
+		void HandleVNRequest (VNRequest request, NSError error)
 		{
 			classifying = false;
 
@@ -111,13 +111,14 @@ namespace HotDogOrNot
 		void ShowObservation (VNClassificationObservation observation)
 		{
 			var good = observation.Confidence > 0.9;
-			var name = observation.Identifier.Replace ('-', ' ');
+			var name = observation.Identifier.Replace ('-', ' ').ToUpperInvariant ();
+			var title = good ? $"{name}" : $"maybe {name}";
+			var message = $"I am {Math.Round (observation.Confidence * 100)}% sure.";
 
 			BeginInvokeOnMainThread (() => {
-				var alert = new UIAlertController ();
+				var alert = UIAlertController.Create (title, message, UIAlertControllerStyle.Alert);
 				alert.AddAction (UIAlertAction.Create ("OK", UIAlertActionStyle.Default, _ => { }));
-				alert.Message = good ? $"{name}" : $"maybe {name}";
-				Console.WriteLine (alert.Message);
+				Console.WriteLine (title + "-" + message);
 				PresentViewController (alert, true, null);
 			});
 		}
