@@ -1,15 +1,18 @@
 ﻿using System;
 
+using Foundation;
 using UIKit;
 using ARKit;
 using CoreVideo;
 using CoreGraphics;
+using CoreML;
 
 namespace HotDogOrNot
 {
 	public partial class ViewController : UIViewController
 	{
 		readonly ARSCNView cameraView = new ARSCNView ();
+		MLModel model;
 
 		protected ViewController (IntPtr handle) : base (handle)
 		{
@@ -19,9 +22,19 @@ namespace HotDogOrNot
 		{
 			base.ViewDidLoad ();
 
+			var modelUrl = NSBundle.MainBundle.GetUrlForResource ("HotDogOrNot", "mlmodel");
+			var compiledModelUrl = MLModel.CompileModel (modelUrl, out var error);
+			if (error == null) {
+				model = MLModel.Create (compiledModelUrl, out error);
+				Console.WriteLine ($"MODEL LOADED: {model}");
+			}
+			if (error != null) {
+				Console.WriteLine ($"ERROR LOADING MODEL: {error}");
+			}
+
+			cameraView.AddGestureRecognizer (new UITapGestureRecognizer (HandleTapped));
 			cameraView.Frame = View.Bounds;
 			cameraView.AutoresizingMask = UIViewAutoresizing.FlexibleDimensions;
-			cameraView.AddGestureRecognizer (new UITapGestureRecognizer (HandleTapped));
 			View.AddSubview (cameraView);
 		}
 
