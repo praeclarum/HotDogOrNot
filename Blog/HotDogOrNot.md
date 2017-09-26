@@ -1,6 +1,7 @@
 # "Hotdog or Not" Using Azure Custom Vision, CoreML, and Xamarin
 
-**TL;DR** I used Microsoft's Custom Vision service to train a CoreML model and wrote an iOS app in Xamarin to execute it in less than two hours. It has a loose tie-in with a popular television show.
+**TL;DR** I used Microsoft's Custom Vision service to train a CoreML model and wrote an iOS app in Xamarin to execute it in less than two hours. It has a loose tie-in with a popular television show. [Code on GitHub](https://github.com/praeclarum/HotDogOrNot)
+
 
 ## Machine Learning Is Easy Now?
 
@@ -157,7 +158,7 @@ public override void ViewDidLoad ()
 }
 ```
 
-Perform the standard management of that view.
+Perform the standard management of that view. This is all we need to get a live camera preview.
 
 ```csharp
 // In ViewController
@@ -183,9 +184,12 @@ Add the model to the resources section of your app.
 
 Add code to load the model. Models need to be compiled before they can be loaded. If you have access to Xcode, you can pre-compile your models. Compiling on the device is pretty fast so we won't bother with that optimization. (I do this loading in the view controller's `ViewDidLoad` method but you should architect your app better by doing this work on a background task.)
 
+This also includes code to initialize the Vision request that we will make. Requests can be used for multiple images so we initialize it once. When a request completes, `HandleVNRequest` will be called.
+
 ```csharp
 // In ViewController
 MLModel model;
+VNCoreMLRequest classificationRequest;
 
 // In ViewController.ViewDidLoad ()
 var modelUrl = NSBundle.MainBundle.GetUrlForResource (
@@ -193,13 +197,73 @@ var modelUrl = NSBundle.MainBundle.GetUrlForResource (
 var compiledModelUrl = MLModel.CompileModel (modelUrl, out var error);
 if (error == null) {
     model = MLModel.Create (compiledModelUrl, out error);
+    if (error == null) {
+        var nvModel = VNCoreMLModel.FromMLModel (model, out error);
+        if (error == null) {
+            classificationRequest = new VNCoreMLRequest (nvModel, HandleVNRequest);
+        }
+    }
 }
 ```
 
-Add a tap handler that will respond to any taps on the screen (I like simple UIs). When a tap is detected, the Vision framework will be used to execute the model.
+Add a tap handler that will respond to any taps on the screen (I like simple UIs). When a tap is detected, the Vision framework will be used to perform the model execution.
 
 ```csharp
 // In ViewController.ViewDidLoad ()
 cameraView.AddGestureRecognizer (new UITapGestureRecognizer (HandleTapped));
+
+// In ViewController
+void HandleTapped ()
+{
+    var image = cameraView.Session?.CurrentFrame?.CapturedImage;
+    if (image == null) return;
+
+    var handler = new VNImageRequestHandler (image, CGImagePropertyOrientation.Up, new VNImageOptions ());
+
+    Task.Run (() => {
+        handler.Perform (new[] { classificationRequest }, out var error);
+    });
+}
+
+void HandleVNRequest (VNRequest request, NSError error)
+{
+    if (error != null) return;
+	
+    var observations =
+        request.GetResults<VNClassificationObservation> ()
+               .OrderByDescending (x => x.Confidence);
+
+    ShowObservation (observations.First ());
+}
+
 ```
 
+Finally, in `ShowObervation` we present an alert of the model's best guess.
+
+```csharp
+// In ViewController
+void ShowObservation (VNClassificationObservation observation)
+{
+    var good = observation.Confidence > 0.9;
+    var name = observation.Identifier.Replace ('-', ' ');
+    var title = good ? $"{name}" : $"maybe {name}";
+    var message = $"I am {Math.Round (observation.Confidence * 100)}% sure.";
+
+    BeginInvokeOnMainThread (() => {
+        var alert = UIAlertController.Create (title, message, UIAlertControllerStyle.Alert);
+        alert.AddAction (UIAlertAction.Create ("OK", UIAlertActionStyle.Default, _ => { }));
+        PresentViewController (alert, true, null);
+    });
+}
+```
+
+And that's it, we now have an app that can detect hot dogs (or not)!
+
+![App detecting a hotdog](Results.jpg)
+
+You can find the [complete source code on GitHub](https://github.com/praeclarum/HotDogOrNot).
+
+
+## Conclusion
+
+It's great to see Microsoft and Apple technologies working together to make adding a powerful feature to apps easier. If you made it this far, you saw how I was able to build the app in less than two hours and I think you can see that it's pretty easy to make your own ML apps.
