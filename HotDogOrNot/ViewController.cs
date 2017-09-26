@@ -2,12 +2,14 @@
 
 using UIKit;
 using ARKit;
+using CoreVideo;
+using CoreGraphics;
 
 namespace HotDogOrNot
 {
 	public partial class ViewController : UIViewController
 	{
-		ARSCNView cameraView = new ARSCNView ();
+		readonly ARSCNView cameraView = new ARSCNView ();
 
 		protected ViewController (IntPtr handle) : base (handle)
 		{
@@ -19,6 +21,7 @@ namespace HotDogOrNot
 
 			cameraView.Frame = View.Bounds;
 			cameraView.AutoresizingMask = UIViewAutoresizing.FlexibleDimensions;
+			cameraView.AddGestureRecognizer (new UITapGestureRecognizer (HandleTapped));
 			View.AddSubview (cameraView);
 		}
 
@@ -37,6 +40,17 @@ namespace HotDogOrNot
 			base.ViewWillDisappear (animated);
 
 			cameraView.Session.Pause ();
+		}
+
+		void HandleTapped ()
+		{
+			var image = cameraView.Session?.CurrentFrame?.CapturedImage;
+			if (image == null) {
+				Console.WriteLine ("NO IMAGE");
+				return;
+			}
+
+			Console.WriteLine (image);
 		}
 
 		public override void DidReceiveMemoryWarning ()
