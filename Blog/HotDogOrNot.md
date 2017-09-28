@@ -146,37 +146,33 @@ First, create a new Single View app.
 
 Modify `ViewController.cs` to add an AR view.
 
-```csharp
-// In ViewController
-readonly ARSCNView cameraView = new ARSCNView ();
-public override void ViewDidLoad ()
-{
-    base.ViewDidLoad ();
-    cameraView.Frame = View.Bounds;
-    cameraView.AutoresizingMask = UIViewAutoresizing.FlexibleDimensions;
-    View.AddSubview (cameraView);
-}
-```
+    // In ViewController
+    readonly ARSCNView cameraView = new ARSCNView ();
+    public override void ViewDidLoad ()
+    {
+        base.ViewDidLoad ();
+        cameraView.Frame = View.Bounds;
+        cameraView.AutoresizingMask = UIViewAutoresizing.FlexibleDimensions;
+        View.AddSubview (cameraView);
+    }
 
 Perform the standard management of that view. This is all we need to get a live camera preview.
 
-```csharp
-// In ViewController
-public override void ViewWillAppear (bool animated)
-{
-    base.ViewWillAppear (animated);
-    var config = new ARWorldTrackingConfiguration {
-        WorldAlignment = ARWorldAlignment.Gravity,
-    };
-    cameraView.Session.Run (config, (ARSessionRunOptions)0);
-}
+    // In ViewController
+    public override void ViewWillAppear (bool animated)
+    {
+        base.ViewWillAppear (animated);
+        var config = new ARWorldTrackingConfiguration {
+            WorldAlignment = ARWorldAlignment.Gravity,
+        };
+        cameraView.Session.Run (config, (ARSessionRunOptions)0);
+    }
 
-public override void ViewWillDisappear (bool animated)
-{
-    base.ViewWillDisappear (animated);
-    cameraView.Session.Pause ();
-}
-```
+    public override void ViewWillDisappear (bool animated)
+    {
+        base.ViewWillDisappear (animated);
+        cameraView.Session.Pause ();
+    }
 
 Add the model to the resources section of your app.
 
@@ -186,76 +182,69 @@ Add code to load the model. Models need to be compiled before they can be loaded
 
 This also includes code to initialize the Vision request that we will make. Requests can be used for multiple images so we initialize it once. When a request completes, `HandleVNRequest` will be called.
 
-```csharp
-// In ViewController
-MLModel model;
-VNCoreMLRequest classificationRequest;
+    // In ViewController
+    MLModel model;
+    VNCoreMLRequest classificationRequest;
 
-// In ViewController.ViewDidLoad ()
-var modelUrl = NSBundle.MainBundle.GetUrlForResource (
-    "HotDogOrNot", "mlmodel");
-var compiledModelUrl = MLModel.CompileModel (modelUrl, out var error);
-if (error == null) {
-    model = MLModel.Create (compiledModelUrl, out error);
+    // In ViewController.ViewDidLoad ()
+    var modelUrl = NSBundle.MainBundle.GetUrlForResource (
+        "HotDogOrNot", "mlmodel");
+    var compiledModelUrl = MLModel.CompileModel (modelUrl, out var error);
     if (error == null) {
-        var nvModel = VNCoreMLModel.FromMLModel (model, out error);
+        model = MLModel.Create (compiledModelUrl, out error);
         if (error == null) {
-            classificationRequest = new VNCoreMLRequest (nvModel, HandleVNRequest);
+            var nvModel = VNCoreMLModel.FromMLModel (model, out error);
+            if (error == null) {
+                classificationRequest = new VNCoreMLRequest (nvModel, HandleVNRequest);
+            }
         }
     }
-}
-```
 
 Add a tap handler that will respond to any taps on the screen (I like simple UIs). When a tap is detected, the Vision framework will be used to perform the model execution.
 
-```csharp
-// In ViewController.ViewDidLoad ()
-cameraView.AddGestureRecognizer (new UITapGestureRecognizer (HandleTapped));
+    // In ViewController.ViewDidLoad ()
+    cameraView.AddGestureRecognizer (new UITapGestureRecognizer (HandleTapped));
 
-// In ViewController
-void HandleTapped ()
-{
-    var image = cameraView.Session?.CurrentFrame?.CapturedImage;
-    if (image == null) return;
+    // In ViewController
+    void HandleTapped ()
+    {
+        var image = cameraView.Session?.CurrentFrame?.CapturedImage;
+        if (image == null) return;
 
-    var handler = new VNImageRequestHandler (image, CGImagePropertyOrientation.Up, new VNImageOptions ());
+        var handler = new VNImageRequestHandler (image, CGImagePropertyOrientation.Up, new VNImageOptions ());
 
-    Task.Run (() => {
-        handler.Perform (new[] { classificationRequest }, out var error);
-    });
-}
+        Task.Run (() => {
+            handler.Perform (new[] { classificationRequest }, out var error);
+        });
+    }
 
-void HandleVNRequest (VNRequest request, NSError error)
-{
-    if (error != null) return;
-	
-    var observations =
-        request.GetResults<VNClassificationObservation> ()
-               .OrderByDescending (x => x.Confidence);
+    void HandleVNRequest (VNRequest request, NSError error)
+    {
+        if (error != null) return;
+        
+        var observations =
+            request.GetResults<VNClassificationObservation> ()
+                .OrderByDescending (x => x.Confidence);
 
-    ShowObservation (observations.First ());
-}
-
-```
+        ShowObservation (observations.First ());
+    }
 
 Finally, in `ShowObervation` we present an alert of the model's best guess.
 
-```csharp
-// In ViewController
-void ShowObservation (VNClassificationObservation observation)
-{
-    var good = observation.Confidence > 0.9;
-    var name = observation.Identifier.Replace ('-', ' ');
-    var title = good ? $"{name}" : $"maybe {name}";
-    var message = $"I am {Math.Round (observation.Confidence * 100)}% sure.";
+    // In ViewController
+    void ShowObservation (VNClassificationObservation observation)
+    {
+        var good = observation.Confidence > 0.9;
+        var name = observation.Identifier.Replace ('-', ' ');
+        var title = good ? $"{name}" : $"maybe {name}";
+        var message = $"I am {Math.Round (observation.Confidence * 100)}% sure.";
 
-    BeginInvokeOnMainThread (() => {
-        var alert = UIAlertController.Create (title, message, UIAlertControllerStyle.Alert);
-        alert.AddAction (UIAlertAction.Create ("OK", UIAlertActionStyle.Default, _ => { }));
-        PresentViewController (alert, true, null);
-    });
-}
-```
+        BeginInvokeOnMainThread (() => {
+            var alert = UIAlertController.Create (title, message, UIAlertControllerStyle.Alert);
+            alert.AddAction (UIAlertAction.Create ("OK", UIAlertActionStyle.Default, _ => { }));
+            PresentViewController (alert, true, null);
+        });
+    }
 
 And that's it, we now have an app that can detect hot dogs (or not)!
 
