@@ -11,15 +11,22 @@ using System.Threading.Tasks;
 using Vision;
 using ImageIO;
 using System.Linq;
+using SceneKit;
+using AVFoundation;
+using CoreImage;
 
 namespace HotDogOrNot
 {
 	public partial class ViewController : UIViewController
 	{
-		readonly ARSCNView cameraView = new ARSCNView ();
+		ARSCNView arView;
+
+		UIImageView imgView;
+
 		MLModel model;
 		VNCoreMLRequest classificationRequest;
 		bool classifying;
+		bool arkitSupported;
 
 		protected ViewController (IntPtr handle) : base (handle)
 		{
@@ -45,39 +52,62 @@ namespace HotDogOrNot
 				Console.WriteLine ($"ERROR LOADING MODEL: {error}");
 			}
 
-			cameraView.AddGestureRecognizer (new UITapGestureRecognizer (HandleTapped));
-			cameraView.Frame = View.Bounds;
-			cameraView.AutoresizingMask = UIViewAutoresizing.FlexibleDimensions;
-			View.AddSubview (cameraView);
+			arkitSupported = ARConfiguration.IsSupported;
+
+			if (arkitSupported) {
+				arView = new ARSCNView () {
+					Frame = View.Bounds,
+					AutoresizingMask = UIViewAutoresizing.FlexibleDimensions,
+				};
+				arView.AddGestureRecognizer (new UITapGestureRecognizer (HandleARTapped));
+				View.AddSubview (arView);
+			}
+			else {
+				imgView = new UIImageView (View.Bounds) {
+					BackgroundColor = UIColor.Black,
+					ContentMode = UIViewContentMode.ScaleAspectFill,
+					UserInteractionEnabled = true,
+					Frame = View.Bounds,
+					AutoresizingMask = UIViewAutoresizing.FlexibleDimensions,
+				};
+				imgView.AddGestureRecognizer (new UITapGestureRecognizer (HandleImageTapped));
+				View.AddSubview (imgView);
+			}
 		}
 
 		public override void ViewWillAppear (bool animated)
 		{
 			base.ViewWillAppear (animated);
 
-			var config = new ARWorldTrackingConfiguration {
-				WorldAlignment = ARWorldAlignment.Gravity,
-			};
-			cameraView.Session.Run (config, (ARSessionRunOptions)0);
+			if (arkitSupported) {
+				var config = new ARWorldTrackingConfiguration {
+					WorldAlignment = ARWorldAlignment.Gravity,
+				};
+				arView.Session.Run (config, (ARSessionRunOptions)0);
+			}
 		}
 
 		public override void ViewWillDisappear (bool animated)
 		{
 			base.ViewWillDisappear (animated);
 
-			cameraView.Session.Pause ();
+			if (arkitSupported) {
+				arView.Session.Pause ();
+			}
 		}
 
-		void HandleTapped ()
+		void HandleARTapped ()
 		{
 			if (classifying)
 				return;
-			
-			var image = cameraView.Session?.CurrentFrame?.CapturedImage;
+
+			var image = arView.Session?.CurrentFrame?.CapturedImage;
 			if (image == null) {
 				Console.WriteLine ("NO IMAGE");
 				return;
 			}
+
+			classifying = true;
 
 			var handler = new VNImageRequestHandler (image, CGImagePropertyOrientation.Up, new VNImageOptions ());
 
@@ -87,8 +117,38 @@ namespace HotDogOrNot
 					Console.WriteLine ($"ERROR PERFORMING REQUEST: {error}");
 				}
 			});
+		}
 
-			Console.WriteLine (image);
+		void HandleImageTapped ()
+		{
+			if (classifying)
+				return;
+
+			var picker = new UIImagePickerController {
+				AllowsEditing = false,
+				SourceType = UIImagePickerControllerSourceType.Camera
+			};
+
+			picker.ModalPresentationStyle = UIModalPresentationStyle.FullScreen;
+
+			picker.FinishedPickingMedia += (s, e) => {
+				base.DismissViewController (true, () => {
+					var image = e.OriginalImage;
+					imgView.Image = image;
+
+					var ciImage = new CIImage (image);
+
+					Task.Run (() => {
+						var handler = new VNImageRequestHandler (ciImage, new VNImageOptions ());
+						handler.Perform (new[] { classificationRequest }, out var error);
+						if (error != null) {
+							Console.WriteLine ($"ERROR PERFORMING REQUEST: {error}");
+						}
+					});
+				});
+			};
+
+			PresentViewController (picker, true, null);
 		}
 
 		void HandleVNRequest (VNRequest request, NSError error)
@@ -97,11 +157,11 @@ namespace HotDogOrNot
 
 			if (error != null)
 				return;
-			
+
 			var observations =
 				request.GetResults<VNClassificationObservation> ()
-				       .OrderByDescending (x => x.Confidence)
-				       .ToList ();
+					   .OrderByDescending (x => x.Confidence)
+					   .ToList ();
 			foreach (var o in observations) {
 				Console.WriteLine ($"{o.Identifier} == {o.Confidence}");
 			}
