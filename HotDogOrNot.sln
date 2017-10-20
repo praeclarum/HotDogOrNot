@@ -1,7 +1,14 @@
 
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HotDogOrNot", "HotDogOrNot\HotDogOrNot.csproj", "{4E1CA6E7-88BF-45CA-B3E3-DB2C5EF3C505}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HotDogOrNot.iOS", "HotDogOrNot.iOS\HotDogOrNot.iOS.csproj", "{4E1CA6E7-88BF-45CA-B3E3-DB2C5EF3C505}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HotDogOrNot.Droid", "HotDogOrNot.Android\HotDogOrNot.Droid.csproj", "{00B78B31-282E-4A8D-903A-0284F38AE7A0}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{F629A6F2-0CAA-41FF-A8CB-ED90E48C23F7}"
+	ProjectSection(SolutionItems) = preProject
+		README.md = README.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -19,5 +26,13 @@ Global
 		{4E1CA6E7-88BF-45CA-B3E3-DB2C5EF3C505}.Release|iPhoneSimulator.Build.0 = Release|iPhoneSimulator
 		{4E1CA6E7-88BF-45CA-B3E3-DB2C5EF3C505}.Debug|iPhone.ActiveCfg = Debug|iPhone
 		{4E1CA6E7-88BF-45CA-B3E3-DB2C5EF3C505}.Debug|iPhone.Build.0 = Debug|iPhone
+		{00B78B31-282E-4A8D-903A-0284F38AE7A0}.Debug|iPhoneSimulator.ActiveCfg = Debug|Any CPU
+		{00B78B31-282E-4A8D-903A-0284F38AE7A0}.Debug|iPhoneSimulator.Build.0 = Debug|Any CPU
+		{00B78B31-282E-4A8D-903A-0284F38AE7A0}.Release|iPhone.ActiveCfg = Release|Any CPU
+		{00B78B31-282E-4A8D-903A-0284F38AE7A0}.Release|iPhone.Build.0 = Release|Any CPU
+		{00B78B31-282E-4A8D-903A-0284F38AE7A0}.Release|iPhoneSimulator.ActiveCfg = Release|Any CPU
+		{00B78B31-282E-4A8D-903A-0284F38AE7A0}.Release|iPhoneSimulator.Build.0 = Release|Any CPU
+		{00B78B31-282E-4A8D-903A-0284F38AE7A0}.Debug|iPhone.ActiveCfg = Debug|Any CPU
+		{00B78B31-282E-4A8D-903A-0284F38AE7A0}.Debug|iPhone.Build.0 = Debug|Any CPU
 	EndGlobalSection
 EndGlobal

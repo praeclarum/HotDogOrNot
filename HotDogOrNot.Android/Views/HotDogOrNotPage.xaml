@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms" 
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" 
+    xmlns:local="clr-namespace:HotDogOrNot" 
+    x:Class="HotDogOrNot.HotDogOrNotPage">
+     <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <Button x:Name="ButtonTakePhoto" 
+                Text="Take Photo" 
+                Clicked="HandleTake_Clicked"/>
+        <Button x:Name="ButtonPickPhoto" 
+                Grid.Column="1" 
+                Text="Pick Photo" 
+                Clicked="HandlePick_Clicked"/>
+        <Image x:Name="ImageMain" 
+                Grid.Row="1" 
+                Grid.ColumnSpan="2"/>
+        <ActivityIndicator
+            Grid.Row="1" 
+            Grid.ColumnSpan="2" 
+            x:Name="IsProcessing"
+            Color="White" IsVisible="false"/>
+        <Button x:Name="ButtonAnalyze" 
+            Clicked="HandleAnalyze_Clicked"
+                Grid.Row="2" 
+                Grid.ColumnSpan="2" 
+                Text="Is It A Hot Dog or Not?" />
+     </Grid>
+</ContentPage>
