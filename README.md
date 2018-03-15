@@ -15,6 +15,10 @@ Guid projectId = Guid.Parse("");
 const string predictionKey = "";
 ```
 ### IMPORTANT
-Note: Ensure in [Microsoft's Custom Vision service] that a default is set under the Prediction Tab after training). Otherwise the  var result = await endpoint.PredictImageAsync(projectId, stream);  will return a http response of "Not Found". This is due to the Prediction URL containing the iterationid appended to the end of the url. This is removed once default is set.
+Note: Ensure in [Microsoft's Custom Vision service] that a default is set under the Performance Tab after training. (Beside the Prediction URL under the nav bar ). Otherwise the Line within the Predict Method :
+```
+var result = await endpoint.PredictImageAsync(projectId, stream);  
+```
+Will return a http response of "Not Found". This is due to the Prediction URL containing the iteration id appended to the end of the url. This is removed once default is set.
 
 ![Screenshot of the app detecting a hotdog](Blog/Results.jpg)
