@@ -3,7 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Acr.UserDialogs;
-using Microsoft.Cognitive.CustomVision;
+using Microsoft.Cognitive.CustomVision.Prediction;
 using Plugin.Media;
 using Plugin.Media.Abstractions;
 using Xamarin.Forms;
@@ -13,8 +13,7 @@ namespace HotDogOrNot
     public partial class HotDogOrNotPage : ContentPage
     {
         Guid projectId = Guid.Parse("");
-        const string predictionKey = "";
-        PredictionEndpointCredentials predictionEndpointCredentials;
+        const string predictionKey = "";        
         PredictionEndpoint endpoint;
         MediaFile file;
         Stream savedStream;
@@ -22,8 +21,8 @@ namespace HotDogOrNot
         public HotDogOrNotPage()
         {
             InitializeComponent();
-            predictionEndpointCredentials = new PredictionEndpointCredentials(predictionKey);
-            endpoint = new PredictionEndpoint(predictionEndpointCredentials);
+           
+            endpoint = new PredictionEndpoint() { ApiKey = predictionKey };
         }
 
         async void HandleTake_Clicked(object sender, System.EventArgs e)
@@ -64,7 +63,7 @@ namespace HotDogOrNot
             ImageMain.Source = ImageSource.FromStream(() =>
             {
                 var stream = savedStream = file.GetStream();
-                file.Dispose();
+                //Removed file dispose as the Predict method threw and exception on file.GetStream. Cannot access a disposed object
                 return stream;
             });
         }
