@@ -12,8 +12,8 @@ namespace HotDogOrNot
 {
     public partial class HotDogOrNotPage : ContentPage
     {
-        Guid projectId = Guid.Parse("6d20a267-3ba9-4454-a31a-207d4995239e");
-        const string predictionKey = "9be413c64fb244a98a15fb680379d895";        
+        Guid projectId = Guid.Parse("");
+        const string predictionKey = "";        
         PredictionEndpoint endpoint;
         MediaFile file;
         Stream savedStream;
