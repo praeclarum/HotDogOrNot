@@ -14,5 +14,6 @@ For Android all analysis is done using Custom Vision services. You must setup a 
 Guid projectId = Guid.Parse("");
 const string predictionKey = "";
 ```
-Note: (IMPORTANT: Ensure in [Microsoft's Custom Vision service] that a default is set under the Prediction Tab after training). Otherwise the  var result = await endpoint.PredictImageAsync(projectId, stream);  will return a not found for the uri. This is due to the Prediction URL containing the iterationid appended to the end of the url.
+Note: (IMPORTANT: Ensure in [Microsoft's Custom Vision service] that a default is set under the Prediction Tab after training). Otherwise the  var result = await endpoint.PredictImageAsync(projectId, stream);  will return a http response of "Not Found". This is due to the Prediction URL containing the iterationid appended to the end of the url. This is removed once default is set.
+
 ![Screenshot of the app detecting a hotdog](Blog/Results.jpg)
